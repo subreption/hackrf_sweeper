@@ -535,6 +535,35 @@ int hackrf_sweep_set_write_mutex(hackrf_sweep_state_t *state,
 	return HACKRF_ERROR_INVALID_PARAM;
 }
 
+int hackrf_sweep_import_wisdom(hackrf_sweep_state_t *state, const char* path)
+{
+	// Returns nonzero
+	if (!fftwf_import_wisdom_from_filename(path)) {
+		/* Import the system default if failed */
+		fftwf_import_system_wisdom();
+		return HACKRF_ERROR_INVALID_PARAM;
+	}
+
+	return HACKRF_SUCCESS;
+}
+
+int hackrf_sweep_export_wisdom(hackrf_sweep_state_t *state, const char* path)
+{
+	/* Wisdom handling is technically independent of state */
+	if (!is_flag_set(state, SWEEP_STATE_INITIALIZED)) {
+		return HACKRF_ERROR_INVALID_PARAM;
+	}
+
+	if (path != NULL) {
+		if (!fftwf_export_wisdom_to_filename(path)) {
+			fprintf(stderr, "Could not write FFTW wisdom file to %s", path);
+			return HACKRF_ERROR_INVALID_PARAM;
+		}
+	}
+
+	return HACKRF_SUCCESS;
+}
+
 int hackrf_sweep_set_sample_rate(hackrf_sweep_state_t *state, uint64_t sample_rate_hz)
 {
 	/* TODO: changing sample rate needs recalculating fft size etc */

@@ -563,6 +563,28 @@ extern ADDAPI int ADDCALL hackrf_sweep_set_output(hackrf_sweep_state_t *state,
 	void *arg);
 
 /**
+ * Configure the FFTW wisdom file
+ *
+ * @param state sweep state
+ * @param path path to Wisdom file
+ * @return @ref HACKRF_SUCCESS on success or @ref hackrf_error variant
+ * @ingroup sweep
+ */
+extern ADDAPI int ADDCALL hackrf_sweep_import_wisdom(hackrf_sweep_state_t *state,
+	const char *path);
+
+/**
+ * Export the FFTW wisdom file
+ *
+ * @param state sweep state
+ * @param path path to Wisdom file (file or parent directory must be writable)
+ * @return @ref HACKRF_SUCCESS on success or @ref hackrf_error variant
+ * @ingroup sweep
+ */
+extern ADDAPI int ADDCALL hackrf_sweep_export_wisdom(hackrf_sweep_state_t *state,
+	const char *path);
+
+/**
  * Configure the user callback for the FFT bins
  *
  * @param state sweep state

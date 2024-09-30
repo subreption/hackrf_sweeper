@@ -323,7 +323,7 @@ void *consumer_thread(void *arg)
 
         }
 
-        zsys_info("Applying certificate certificate...");
+        zsys_info("Applying certificate...");
         zcert_apply (server_cert, publisher);
     }
 

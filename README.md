@@ -154,7 +154,7 @@ Once the keys for the server have been generated, the demo application can run:
 $ ./hackrf_sweeper_zmqpub -S ../test-keys/server.key
 call hackrf_sample_rate_set(20.000 MHz)
 call hackrf_baseband_filter_bandwidth_set(15.000 MHz)
-I: 24-09-30 20:12:09 Applying certificate certificate...
+I: 24-09-30 20:12:09 Applying certificate...
 Stop with Ctrl-C
 1 total sweeps completed, 1.00 sweeps/second, 12800.00 KB/s
 2 total sweeps completed, 1.00 sweeps/second, 13056.00 KB/s

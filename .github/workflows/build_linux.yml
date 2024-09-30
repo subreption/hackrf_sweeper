@@ -2,7 +2,7 @@
 # Stripped down version of the official hackrf workflow.
 #
 
-name: Build
+name: Build (Linux)
 
 on:
 

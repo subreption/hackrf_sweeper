@@ -1,6 +1,4 @@
-[![pages-build-deployment](https://github.com/subreption/hackrf_sweeper/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/pages/pages-build-deployment)
-
-[![Doxygen Documentation](https://github.com/subreption/hackrf_sweeper/actions/workflows/deploy_doxygen.yml/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/deploy_doxygen.yml)
+[![pages-build-deployment](https://github.com/subreption/hackrf_sweeper/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/pages/pages-build-deployment) [![Doxygen Documentation](https://github.com/subreption/hackrf_sweeper/actions/workflows/deploy_doxygen.yml/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/deploy_doxygen.yml) [![Build (Linux)](https://github.com/subreption/hackrf_sweeper/actions/workflows/build_linux.yml/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/build_linux.yml)
 
 # HackRF Sweeper
 

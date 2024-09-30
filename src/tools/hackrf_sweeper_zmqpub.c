@@ -517,6 +517,7 @@ int main(int argc, char** argv)
     consumer_thread_args_t consumer_args;
     const char *zmq_connection_string = "tcp://*:5555";
     const char *server_secret_key_file = NULL;
+    const char* fftwWisdomPath = NULL;
 
     // Initialize the ring buffer
     ring_buffer_init(&ring_buffer);
@@ -525,7 +526,7 @@ int main(int argc, char** argv)
 
     memset(&frequencies, 0, sizeof(frequencies));
 
-	while ((opt = getopt_long(argc, argv, "a:f:p:l:g:d:N:w:n1:C:S:h?", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "a:f:p:l:g:d:N:w:W:n1:C:S:h?", long_options, NULL)) != -1) {
 		result = HACKRF_SUCCESS;
 		switch (opt) {
 		case 'd':
@@ -611,6 +612,10 @@ int main(int argc, char** argv)
                     "argument error: FFT bin width (-w) must be no less than 2445\n");
                 return EXIT_FAILURE;
             }
+			break;
+
+        case 'W':
+			fftwWisdomPath = optarg;
 			break;
 
 		case 'n':
@@ -797,6 +802,12 @@ int main(int argc, char** argv)
 			result);
         cleanup();
 		return EXIT_FAILURE;
+	}
+
+	if (fftwWisdomPath) {
+		hackrf_sweep_import_wisdom(sweep_state, fftwWisdomPath);
+	} else {
+		hackrf_sweep_import_wisdom(sweep_state, NULL);
 	}
 
     result = hackrf_sweep_setup_fft(sweep_state, FFTW_MEASURE, requested_fft_bin_width);

@@ -403,14 +403,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-	// Try to load a wisdom file if specified, otherwise
-	// try to load the system-wide wisdom file
-	if (fftwWisdomPath) {
-		import_wisdom(fftwWisdomPath);
-	} else {
-		import_default_wisdom();
-	}
-
 	if (lna_gain % 8) {
 		fprintf(stderr, "warning: lna_gain (-l) must be a multiple of 8\n");
 	}
@@ -575,6 +567,14 @@ int main(int argc, char** argv)
 			result);
         cleanup();
 		return EXIT_FAILURE;
+	}
+
+	// Try to load a wisdom file if specified, otherwise
+	// try to load the system-wide wisdom file
+	if (fftwWisdomPath) {
+		hackrf_sweep_import_wisdom(sweep_state, fftwWisdomPath);
+	} else {
+		hackrf_sweep_import_wisdom(sweep_state, NULL);
 	}
 
     result = hackrf_sweep_setup_fft(sweep_state, fftw_plan_type,

@@ -538,10 +538,12 @@ int hackrf_sweep_set_write_mutex(hackrf_sweep_state_t *state,
 int hackrf_sweep_import_wisdom(hackrf_sweep_state_t *state, const char* path)
 {
 	// Returns nonzero
-	if (!fftwf_import_wisdom_from_filename(path)) {
+	if ( (path != NULL) && !fftwf_import_wisdom_from_filename(path)) {
 		/* Import the system default if failed */
 		fftwf_import_system_wisdom();
 		return HACKRF_ERROR_INVALID_PARAM;
+	} else {
+		fftwf_import_system_wisdom();
 	}
 
 	return HACKRF_SUCCESS;

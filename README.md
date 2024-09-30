@@ -1,3 +1,7 @@
+[![pages-build-deployment](https://github.com/subreption/hackrf_sweeper/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/pages/pages-build-deployment)
+
+[![Doxygen Documentation](https://github.com/subreption/hackrf_sweeper/actions/workflows/deploy_doxygen.yml/badge.svg)](https://github.com/subreption/hackrf_sweeper/actions/workflows/deploy_doxygen.yml)
+
 # HackRF Sweeper
 
 > **A reimplementation of hackrf_sweep as a library: TSCM for Joe the plumber**
@@ -36,7 +40,12 @@ We intend to design and develop a GNU Radio block related to this library.
 
 ## Documentation
 
-Pending deployment of CI with Github to generate and host HTML versions of the documentation, it can be generated like so:
+The documentation is automatically published upon changes to this repository at:
+
+https://subreption.github.io/hackrf_sweeper/
+
+### Generating locally
+The documentation can be generated like so:
 
 ```
 $ cd docs/doxygen

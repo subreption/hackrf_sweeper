@@ -1,0 +1,51 @@
+#
+# Stripped down version of the official hackrf workflow.
+#
+
+name: Build
+
+on:
+
+  push:
+  pull_request:
+  workflow_dispatch:
+  # Run automatically every monday
+  schedule:
+    - cron: 1 12 * * 1
+
+jobs:
+  host:
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+
+      # Don't cancel all builds when one fails
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies (Ubuntu)
+      run: |
+        sudo apt update
+        sudo apt install libfftw3-dev libhackrf-dev libczmq-dev libzmq5 libzmq3-dev
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config Release
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE/ -DCMAKE_BUILD_TYPE=Release
+      if: matrix.os != 'windows-latest'
+
+    - name: Install
+      working-directory: ${{github.workspace}}/build
+      run: |
+        sudo cmake --install . --config Release
+      if: matrix.os != 'windows-latest'

@@ -1,8 +1,6 @@
 # HackRF Sweeper
 
-> **A reimplementation of hackrf_sweep as a library **
-
-> **TSCM for Joe the plumber **
+> **A reimplementation of hackrf_sweep as a library: TSCM for Joe the plumber**
 
 
 ![Screenshot](images/plot_demo.png)

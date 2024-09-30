@@ -34,6 +34,20 @@ We intend to design and develop a GNU Radio block related to this library.
  - Easy integration in third-party projects: minimal set of APIs needed to boot.
  - Developed with future merging into upstream hackrf in mind.
 
+## Documentation
+
+Pending deployment of CI with Github to generate and host HTML versions of the documentation, it can be generated like so:
+
+```
+$ cd docs/doxygen
+$ doxygen Doxyfile
+$ ls -ln
+total 124
+-rw-rw-r-- 1 2300 2300 116467 Sep 30 18:42 Doxyfile
+drwxrwxr-x 3 2300 2300   4096 Sep 30 18:54 html
+drwxrwxr-x 2 2300 2300   4096 Sep 30 18:54 latex
+```
+
 ## Building
 
 ### Dependencies

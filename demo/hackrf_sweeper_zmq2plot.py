@@ -40,7 +40,7 @@ message_timestamps = []
 
 def parse_args():
     parser = argparse.ArgumentParser(description='ZeroMQ Subscriber with CURVE encryption')
-    parser.add_argument('-k', '--key-dir', required=True, help='Directory to store/load CURVE keys')
+    parser.add_argument('-k', '--key-dir', help='Directory to store/load CURVE keys')
     parser.add_argument('-s', '--server-address', default='tcp://localhost:5555', help='ZeroMQ server address')
     parser.add_argument('-p', '--server-public-key', help='Path to server public key file (if not in key directory)')
     args = parser.parse_args()
@@ -141,49 +141,50 @@ def get_spectrum_data():
         return frequencies_mhz, last_powers, min_powers, max_powers, timestamps
 
 def calculate_average_messages_per_second():
-    with data_lock:
-        current_time = time.time()
-        window = 5
-        while message_timestamps and message_timestamps[0] < current_time - window:
-            message_timestamps.pop(0)
-        num_messages = len(message_timestamps)
-        average_mps = num_messages / window
-        return average_mps
+    current_time = time.time()
+    window = 1
+    while message_timestamps and message_timestamps[0] < current_time - window:
+        message_timestamps.pop(0)
+    num_messages = len(message_timestamps)
+    average_mps = num_messages / window
+    return average_mps
 
 def zmq_subscriber(args, stop_event):
     key_dir = args.key_dir
     server_address = args.server_address
     server_public_key_path = args.server_public_key
-
-    client_public_key_file, client_secret_key_file, default_server_public_key_file = ensure_keys_exist(key_dir)
-
-    # Use the provided server public key path or the default
-    if server_public_key_path:
-        server_public_key_file = server_public_key_path
-    else:
-        server_public_key_file = default_server_public_key_file
-
-    # Check if server public key file exists
-    if not os.path.exists(server_public_key_file):
-        print(f"Server public key file not found: {server_public_key_file}")
-        sys.exit(1)
-
-    # Load client keys
-    client_public_key, client_secret_key = load_certificate(client_secret_key_file)
-    server_public_key, _ = load_certificate(server_public_key_file)
-
-    # Decode the Z85-encoded keys to binary
-    client_public_key_bin = z85.decode(client_public_key)
-    client_secret_key_bin = z85.decode(client_secret_key)
-    server_public_key_bin = z85.decode(server_public_key)
+    client_public_key_bin, client_secret_key_bin, server_public_key_bin = None, None, None
 
     context = zmq.Context()
-
     subscriber = context.socket(zmq.SUB)
 
-    subscriber.curve_publickey = client_public_key_bin
-    subscriber.curve_secretkey = client_secret_key_bin
-    subscriber.curve_serverkey = server_public_key_bin
+    if key_dir:
+        client_public_key_file, client_secret_key_file, default_server_public_key_file = ensure_keys_exist(key_dir)
+
+        # Use the provided server public key path or the default
+        if server_public_key_path:
+            server_public_key_file = server_public_key_path
+        else:
+            server_public_key_file = default_server_public_key_file
+
+        # Check if server public key file exists
+        if not os.path.exists(server_public_key_file):
+            print(f"Server public key file not found: {server_public_key_file}")
+            sys.exit(1)
+
+        # Load client keys
+        client_public_key, client_secret_key = load_certificate(client_secret_key_file)
+        server_public_key, _ = load_certificate(server_public_key_file)
+
+        # Decode the Z85-encoded keys to binary
+        client_public_key_bin = z85.decode(client_public_key)
+        client_secret_key_bin = z85.decode(client_secret_key)
+        server_public_key_bin = z85.decode(server_public_key)
+
+    if client_public_key_bin and client_secret_key_bin and server_public_key_bin:
+        subscriber.curve_publickey = client_public_key_bin
+        subscriber.curve_secretkey = client_secret_key_bin
+        subscriber.curve_serverkey = server_public_key_bin
 
     subscriber.subscribe("")
     subscriber.connect(server_address)
@@ -192,14 +193,13 @@ def zmq_subscriber(args, stop_event):
 
     try:
         while not stop_event.is_set():
-            if subscriber.poll(timeout=1000):
+            if subscriber.poll(timeout=5000):
                 message = subscriber.recv()
 
                 unpacked_data = msgpack.unpackb(message, raw=False)
-
+                print(unpacked_data)
                 process_data(unpacked_data)
-                with data_lock:
-                    message_timestamps.append(time.time())
+                message_timestamps.append(time.time())
             else:
                 continue
     except KeyboardInterrupt:

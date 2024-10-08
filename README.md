@@ -64,7 +64,7 @@ The library depends on `libhackrf` and FFTW. The ZMQ demo application requires `
 For Debian users:
 
 ```
-$ sudo apt-get install libhackrf-dev libczmq-dev libzmq5
+$ sudo apt-get install libhackrf-dev libczmq-dev libzmq5 libmsgpack-dev
 ```
 
 ### Compilation

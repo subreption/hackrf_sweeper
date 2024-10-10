@@ -1,0 +1,4 @@
+<map id="hackrf_sweep_state" name="hackrf_sweep_state">
+<area shape="rect" id="node1" title="Opaque struct for sweep state control." alt="" coords="9,93,147,119"/>
+<area shape="rect" id="node2" href="$structhackrf__sweep__fft__ctx.html" title="Opaque struct for sweep FFT(W) configuration and data." alt="" coords="5,5,151,31"/>
+</map>

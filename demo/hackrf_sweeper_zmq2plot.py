@@ -42,7 +42,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='ZeroMQ Subscriber with CURVE encryption')
     parser.add_argument('-k', '--key-dir', help='Directory to store/load CURVE keys')
     parser.add_argument('-s', '--server-address', default='tcp://localhost:5555', help='ZeroMQ server address')
-    parser.add_argument('-p', '--server-public-key', help='Path to server public key file (if not in key directory)')
+    parser.add_argument('-p', '--server-public-key', help='Path to server public key file (if not in the key directory)')
+    parser.add_argument('-g', '--generate-server-keys', action='store_true', help='Generates server public-secret keys in the key directory')
     args = parser.parse_args()
     return args
 
@@ -210,7 +211,7 @@ def zmq_subscriber(args, stop_event):
                 message = subscriber.recv()
 
                 unpacked_data = msgpack.unpackb(message, raw=False)
-                print(unpacked_data)
+                # print(unpacked_data)
                 process_data(unpacked_data)
                 message_timestamps.append(time.time())
             else:
@@ -224,6 +225,20 @@ def zmq_subscriber(args, stop_event):
 
 def main():
     args = parse_args()
+    
+    # Check if server key generation is called
+    if args.generate_server_keys is True:
+        print("Server keys will be generated...")
+        
+        # Check if the key_dir is set
+        if args.key_dir is None:
+            print("key_dir argument is not set. Please set the key_dir!")
+            sys.exit(1)
+            
+        # Create the certificates    
+        create_certificates(args.key_dir, "server")    
+        print("Server keys are succesfully generated.")
+        sys.exit(0)
 
     stop_event = threading.Event()
 

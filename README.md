@@ -64,7 +64,7 @@ The library depends on `libhackrf` and FFTW. The ZMQ demo application requires `
 For Debian users:
 
 ```
-$ sudo apt-get install libhackrf-dev libczmq-dev libzmq5 libmsgpack-dev
+sudo apt-get install libhackrf-dev libczmq-dev libzmq5 libmsgpack-dev
 ```
 
 ### Compilation
@@ -72,62 +72,17 @@ $ sudo apt-get install libhackrf-dev libczmq-dev libzmq5 libmsgpack-dev
 Clone this repository:
 
 ```
-$ git clone https://github.com/subreption/hackrf_sweeper.git
-$ cd hackrf_sweeper
+git clone https://github.com/subreption/hackrf_sweeper.git
+cd hackrf_sweeper
 ```
 
 Proceed with the usual CMake build process:
 
 ```
-$ mkdir build
-$ cd build
--- The C compiler identification is GNU 13.2.0
--- The CXX compiler identification is GNU 13.2.0
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/cc - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/bin/c++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- Release: git-ad6c10b
--- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
--- Checking for one of the modules 'fftw3'
--- Found LIBHACKRF: /usr/lib/x86_64-linux-gnu/libhackrf.so
-(...)
--- Looking for include file pthread.h
--- Looking for include file pthread.h - found
--- Looking for pthread_create in pthreads
--- Looking for pthread_create in pthreads - not found
--- Looking for pthread_create in pthread
--- Looking for pthread_create in pthread - found
--- Found Threads: TRUE
--- Found FFTW: fftw3
--- Checking for module 'libczmq'
---   Found libczmq, version 4.2.1
--- Checking for module 'libzmq'
---   Found libzmq, version 4.3.5
--- CZeroMQ found: czmq
--- Msgpack found:
--- LibZMQ found: zmq
--- Using FFTW include directory: /usr/include
--- Using libhackrf include directory:
--- Configuring done (1.4s)
--- Generating done (0.0s)
--- Build files have been written to: (...)/hackrf_sweeper/build
-$ make all
-[ 16%] Building C object CMakeFiles/libhackrf_sweeper.dir/src/lib/sweep.c.o
-[ 33%] Linking C static library liblibhackrf_sweeper.a
-[ 33%] Built target libhackrf_sweeper
-[ 50%] Building C object CMakeFiles/hackrf_sweeper.dir/src/tools/hackrf_sweeper.c.o
-[ 66%] Linking C executable hackrf_sweeper
-[ 66%] Built target hackrf_sweeper
-[ 83%] Building C object CMakeFiles/hackrf_sweeper_zmqpub.dir/src/tools/hackrf_sweeper_zmqpub.c.o
-[100%] Linking C executable hackrf_sweeper_zmqpub
-[100%] Built target hackrf_sweeper_zmqpub
+mkdir build
+cd build
+cmake ..
+make all
 ```
 
 ### Running the demo ZMQ application
@@ -135,46 +90,19 @@ $ make all
 The user must generate keys conforming to the modern ZMQ certificate format:
 
 ```
-$ cat ../test-keys/server.key
-#   ****  Generated on 2024-09-28 13:53:55 by CZMQ  ****
-#   ZeroMQ CURVE Public Certificate
-#   Exchange securely, or use a secure mechanism to verify the contents
-#   of this file after exchange. Store public certificates in your home
-#   directory, in the .curve subdirectory.
-
-metadata
-    generator = "hackrf_sweeper_zmq"
-curve
-    public-key = "x>fs%(=GAoN>OB/!%@a#UOwl+qXy]o!E7x61r/f."
+./demo/hackrf_sweeper_zmq2plot.py -k ./test-keys -g
 ```
 
-Once the keys for the server have been generated, the demo application can run:
+Once the keys for the server have been generated, the demo application can be run:
 
 ```
-$ ./hackrf_sweeper_zmqpub -S ../test-keys/server.key
-call hackrf_sample_rate_set(20.000 MHz)
-call hackrf_baseband_filter_bandwidth_set(15.000 MHz)
-I: 24-09-30 20:12:09 Applying certificate...
-Stop with Ctrl-C
-1 total sweeps completed, 1.00 sweeps/second, 12800.00 KB/s
-2 total sweeps completed, 1.00 sweeps/second, 13056.00 KB/s
-4 total sweeps completed, 1.33 sweeps/second, 13056.00 KB/s
-5 total sweeps completed, 1.25 sweeps/second, 13312.00 KB/s
-6 total sweeps completed, 1.20 sweeps/second, 13056.00 KB/s
-8 total sweeps completed, 1.33 sweeps/second, 13056.00 KB/s
-^CCaught signal 2
-
-Exiting...
-Total sweeps: 0 in 6.82657 seconds (1.33 sweeps/second)
-E: 24-09-30 20:12:16 Received NULL data from ring buffer
-closing sweep
+./build/hackrf_sweeper_zmqpub -S ./test-keys/server.key_secret
 ```
+
 With `hackrf_sweeper_zmqpub` still running, the plotting demo application can be run like so:
 
 ```
-$ ./demo/hackrf_sweeper_zmq2plot.py  -k ./test-keys
-Client key pair found in ./test-keys
-Listening for data from tcp://localhost:5555 with CURVE encryption...
+./demo/hackrf_sweeper_zmq2plot.py -k ./test-keys -p ./test-keys/server.key
 ```
 
 **Remember to specify a key directory to hold the CURVE certificates**.

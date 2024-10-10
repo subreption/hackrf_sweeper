@@ -177,6 +177,8 @@ Client key pair found in ./test-keys
 Listening for data from tcp://localhost:5555 with CURVE encryption...
 ```
 
+**Remember to specify a key directory to hold the CURVE certificates**.
+
 ## Reporting bugs
 
 Please file an issue, or even better, provide a **tested** and **documented** PR. :-)

@@ -158,7 +158,12 @@ def zmq_subscriber(args, stop_event):
     context = zmq.Context()
     subscriber = context.socket(zmq.SUB)
 
-    if key_dir:
+    if not key_dir or not server_public_key_path:
+        use_curve = False
+    else:
+        use_curve = True
+
+    if use_curve:
         client_public_key_file, client_secret_key_file, default_server_public_key_file = ensure_keys_exist(key_dir)
 
         # Use the provided server public key path or the default
@@ -166,6 +171,8 @@ def zmq_subscriber(args, stop_event):
             server_public_key_file = server_public_key_path
         else:
             server_public_key_file = default_server_public_key_file
+
+        print(f"Selecting server CURVE public key: {server_public_key_file}")
 
         # Check if server public key file exists
         if not os.path.exists(server_public_key_file):
@@ -181,10 +188,16 @@ def zmq_subscriber(args, stop_event):
         client_secret_key_bin = z85.decode(client_secret_key)
         server_public_key_bin = z85.decode(server_public_key)
 
-    if client_public_key_bin and client_secret_key_bin and server_public_key_bin:
-        subscriber.curve_publickey = client_public_key_bin
-        subscriber.curve_secretkey = client_secret_key_bin
-        subscriber.curve_serverkey = server_public_key_bin
+        if client_public_key_bin and client_secret_key_bin and server_public_key_bin:
+            print("Applying CURVE certificates to socket...")
+
+            subscriber.curve_publickey = client_public_key_bin
+            subscriber.curve_secretkey = client_secret_key_bin
+            subscriber.curve_serverkey = server_public_key_bin
+        else:
+            print("CURVE disabled (keys missing).")
+    else:
+        print("CURVE disabled (must specify key directory and server public key path)")
 
     subscriber.subscribe("")
     subscriber.connect(server_address)

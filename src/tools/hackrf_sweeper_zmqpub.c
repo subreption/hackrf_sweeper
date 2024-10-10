@@ -300,6 +300,8 @@ void *consumer_thread(void *arg)
     {
         zsock_set_curve_server(publisher, true);
 
+		zsys_info("Loading certificate: %s", server_secret_key_file);
+
         server_cert = zcert_load(server_secret_key_file);
         if (server_cert == NULL)
         {
@@ -325,7 +327,9 @@ void *consumer_thread(void *arg)
 
         zsys_info("Applying certificate...");
         zcert_apply (server_cert, publisher);
-    }
+    } else {
+		zsys_info("CURVE disabled for socket");
+	}
 
     ret = zsock_bind(publisher, "%s", zmq_connection_string);
     if (ret == -1) {

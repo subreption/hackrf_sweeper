@@ -235,6 +235,10 @@ def main():
             print("key_dir argument is not set. Please set the key_dir!")
             sys.exit(1)
             
+        # Create the directory if not exists    
+        if not os.path.exists(args.key_dir):
+            os.makedirs(args.key_dir, mode=0o700)
+            
         # Create the certificates    
         create_certificates(args.key_dir, "server")    
         print("Server keys are succesfully generated.")

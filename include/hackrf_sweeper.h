@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h> // for bool
-#include <libhackrf/hackrf.h>
+#include <hackrf.h>
 #include <fftw3.h>
 
 /* Until merge into libhackrf, if it happens, we take these for win32/64 support */

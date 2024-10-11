@@ -1,0 +1,75 @@
+name: Build (OS X)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  host:
+    strategy:
+      # Don't cancel all builds when one fails
+      fail-fast: false
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies (macOS)
+      run: brew install fftw
+
+    - name: Clone libhackrf
+      uses: actions/checkout@v4
+      with:
+        repository: greatscottgadgets/hackrf
+        path: hackrf
+
+    # Build libhackrf ONLY
+    - name: Create Build Environment (libhackrf)
+      run: |
+        cd hackrf
+        cmake -E make_directory ${{github.workspace}}/hackrf/host/libhackrf/build
+        echo "HACKRF_HOME=$PWD" >> $GITHUB_ENV
+
+    - name: Configure CMake (libhackrf)
+      working-directory: ${{github.workspace}}/hackrf/host/libhackrf/build
+      run: cmake $GITHUB_WORKSPACE/hackrf/host/libhackrf/ -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (libhackrf)
+      working-directory: ${{github.workspace}}/hackrf/host/libhackrf/build
+      run: cmake --build . --config Release
+
+    - name: Install (libhackrf)
+      working-directory: ${{github.workspace}}/hackrf/host/libhackrf/build
+      run: |
+        sudo cmake --install . --config Release
+        echo "HACKRF_INSTALL_DIR=/usr/local" >> $GITHUB_ENV
+
+    - name: List artifacts from libhackrf
+      working-directory: ${{github.workspace}}/hackrf/host/libhackrf/build
+      run: |
+        ls -lhR
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE/ -DCMAKE_BUILD_TYPE=Release -DLIBHACKRF_DIR=$HACKRF_INSTALL_DIR
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config Release
+
+    - name: Install
+      working-directory: ${{github.workspace}}/build
+      run: |
+        sudo cmake --install . --config Release
+
+    # Publish the contents of install/bin
+    - name: Publish Artifacts (Windows)
+      uses: actions/upload-artifact@v4
+      with:
+        name: hackrf_sweeper-osx
+        path: ${{github.workspace}}/install/bin

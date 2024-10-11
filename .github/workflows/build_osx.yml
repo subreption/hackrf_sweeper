@@ -19,6 +19,9 @@ jobs:
     - name: Install dependencies (macOS)
       run: brew install fftw
 
+    - name: List available FFTW (macOS)
+      run: brew list fftw --verbose
+
     - name: Clone libhackrf
       uses: actions/checkout@v4
       with:
@@ -46,11 +49,6 @@ jobs:
         sudo cmake --install . --config Release
         echo "HACKRF_INSTALL_DIR=/usr/local" >> $GITHUB_ENV
 
-    - name: List artifacts from libhackrf
-      working-directory: ${{github.workspace}}/hackrf/host/libhackrf/build
-      run: |
-        ls -lhR
-
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -67,8 +65,11 @@ jobs:
       run: |
         sudo cmake --install . --config Release
 
+    - name: List current working directory
+      run: ls -lhrt
+
     # Publish the contents of install/bin
-    - name: Publish Artifacts (Windows)
+    - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: hackrf_sweeper-osx

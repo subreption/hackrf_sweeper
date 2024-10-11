@@ -86,7 +86,7 @@ endif()
 # hackrf_sweep replacement (handled out of band to avoid name collisions with the lib)
 add_executable(hackrf_sweeper_tool src/tools/hackrf_sweeper.c)
 target_link_libraries(hackrf_sweeper_tool ${TOOLS_LINK_LIBS} hackrf_sweeper)
-install(TARGETS hackrf_sweeper_tool RUNTIME DESTINATION ${INSTALL_DEFAULT_eBINDIR})
+install(TARGETS hackrf_sweeper_tool RUNTIME DESTINATION ${INSTALL_DEFAULT_BINDIR})
 
 # Process any other tools
 foreach(tool ${TOOLS})

@@ -56,11 +56,11 @@ else()
 endif()
 
 # Library (libhackrf_sweeper)
-add_library(libhackrf_sweeper STATIC src/lib/sweep.c)
-target_link_libraries(libhackrf_sweeper ${SWEEPER_LIB_LINK_LIBS} ${LIBHACKRF_LIBRARIES})
+add_library(hackrf_sweeper STATIC src/lib/sweep.c)
+target_link_libraries(hackrf_sweeper ${SWEEPER_LIB_LINK_LIBS} ${LIBHACKRF_LIBRARIES})
 
 SET(TOOLS
-        hackrf_sweeper
+    # empty for now
 )
 
 if(MSVC)
@@ -83,9 +83,15 @@ if(MSVC)
 	LIST(APPEND TOOLS_LINK_LIBS libgetopt_static)
 endif()
 
+# hackrf_sweep replacement (handled out of band to avoid name collisions with the lib)
+add_executable(hackrf_sweeper_tool src/tools/hackrf_sweeper.c)
+target_link_libraries(hackrf_sweeper_tool ${TOOLS_LINK_LIBS} hackrf_sweeper)
+install(TARGETS hackrf_sweeper_tool RUNTIME DESTINATION ${INSTALL_DEFAULT_eBINDIR})
+
+# Process any other tools
 foreach(tool ${TOOLS})
 	add_executable(${tool} src/tools/${tool}.c)
-	target_link_libraries(${tool} ${TOOLS_LINK_LIBS} libhackrf_sweeper)
+	target_link_libraries(${tool} ${TOOLS_LINK_LIBS} hackrf_sweeper)
 	install(TARGETS ${tool} RUNTIME DESTINATION ${INSTALL_DEFAULT_BINDIR})
 endforeach(tool)
 
@@ -96,6 +102,7 @@ if( ${WIN32} )
 			PATTERN "fftw*.dll")
 endif( ${WIN32} )
 
+# Handle the ZMQ publisher demo separately
 if(UNIX AND NOT APPLE)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(CZMQ libczmq)
@@ -114,7 +121,7 @@ if(UNIX AND NOT APPLE)
         # Include directories for MessagePack
         include_directories(${MSGPACK_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS} ${LZMQ_INCLUDE_DIRS})
 
-        target_link_libraries(hackrf_sweeper_zmqpub ${TOOLS_LINK_LIBS} ${CZMQ_LIBRARIES} ${LZMQ_LIBRARIES} libhackrf_sweeper pthread)
+        target_link_libraries(hackrf_sweeper_zmqpub ${TOOLS_LINK_LIBS} ${CZMQ_LIBRARIES} ${LZMQ_LIBRARIES} hackrf_sweeper pthread)
         install(TARGETS hackrf_sweeper_zmqpub RUNTIME DESTINATION ${INSTALL_DEFAULT_BINDIR})
     else()
         message(WARNING "ZeroMQ not found. hackrf_sweeper_zmqpub will not be built.")
@@ -122,7 +129,7 @@ if(UNIX AND NOT APPLE)
 
 endif()
 
-install(TARGETS libhackrf_sweeper hackrf_sweeper
+install(TARGETS hackrf_sweeper hackrf_sweeper_tool
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

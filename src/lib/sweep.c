@@ -833,8 +833,6 @@ int hackrf_sweep_close(hackrf_sweep_state_t *state)
 
 	hackrf_sweep_free(state);
 
-	fftw_forget_wisdom();
-
 	set_state_condition(state, SWEEP_STATE_RELEASED);
 
 	return HACKRF_SUCCESS;

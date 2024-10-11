@@ -20,7 +20,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <libhackrf/hackrf.h>
+#include <hackrf.h>
 #include <hackrf_sweeper.h>
 
 #include <stdio.h>

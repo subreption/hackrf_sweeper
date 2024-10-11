@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <stdbool.h> // for bool
 #include <hackrf.h>
 #include <fftw3.h>

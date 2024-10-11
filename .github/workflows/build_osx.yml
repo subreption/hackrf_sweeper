@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  host:
+  build_osx:
     strategy:
       # Don't cancel all builds when one fails
       fail-fast: false

@@ -601,6 +601,7 @@ int hackrf_sweep_set_range(hackrf_sweep_state_t *state,
 		if (range_count > MAX_SWEEP_RANGES) {
 			return HACKRF_SWEEP_ERROR_INVALID_RANGE_COUNT;
 		}
+		state->num_ranges = range_count;
 	}
 
 	mutex_write_lock(state);
@@ -609,8 +610,8 @@ int hackrf_sweep_set_range(hackrf_sweep_state_t *state,
 	/* First step is copying the frequency list and validating it */
 	for (i = 0; i < range_count; i++)
 	{
-		uint16_t freq_min = frequency_list[i];
-		uint16_t freq_max = frequency_list[i+1];
+		uint16_t freq_min = frequency_list[2 * i];
+		uint16_t freq_max = frequency_list[2 * i + 1];
 
 		if (freq_min > freq_max  ||
 			(freq_min > hackrf_sweep_freq_max || freq_min < hackrf_sweep_freq_min)) {
@@ -624,8 +625,8 @@ int hackrf_sweep_set_range(hackrf_sweep_state_t *state,
 			return HACKRF_SWEEP_ERROR_INVALID_RANGE;
 		}
 
-		state->frequencies[i] = freq_min;
-		state->frequencies[i + 1] = freq_max;
+		state->frequencies[2 * i] = freq_min;
+		state->frequencies[2 * i + 1] = freq_max;
 	}
 
 	/*
@@ -633,11 +634,14 @@ int hackrf_sweep_set_range(hackrf_sweep_state_t *state,
 	 * bandwidth. Increase high end of range if necessary to accommodate a
 	 * whole number of steps, minimum 1.
 	 */
+	state->step_count = 0;
 	for (i = 0; i < state->num_ranges; i++) {
-		state->step_count =
-			1 + (state->frequencies[2 * i + 1] - state->frequencies[2 * i] - 1) / state->tune_step;
+		int cur_step_count = 1 + (state->frequencies[2 * i + 1] - state->frequencies[2 * i] - 1) / state->tune_step;
+
+		state->step_count += cur_step_count;
+			
 		state->frequencies[2 * i + 1] =
-			(uint16_t) (state->frequencies[2 * i] + state->step_count * state->tune_step);
+			(uint16_t) (state->frequencies[2 * i] + cur_step_count * state->tune_step);
 	}
 
 	mutex_write_unlock(state);

@@ -303,6 +303,11 @@ typedef int (*hackrf_sweep_mutex_unlock_fn)(void *mutex);
 struct hackrf_sweep_state
 {
 	/**
+	 * User provided context.
+	 */
+	void *user_ctx;
+
+	/**
 	 * Maximum number of sweeps (if non-zero) for a finite run
 	 */
 	uint32_t max_sweeps;

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 project(hackrf_sweeper LANGUAGES C CXX)
 set(MAJOR_VERSION 0)
@@ -6,9 +6,7 @@ set(MINOR_VERSION 1)
 set(PACKAGE hackrf_sweeper)
 set(VERSION_STRING ${MAJOR_VERSION}.${MINOR_VERSION})
 set(VERSION ${VERSION_STRING})
-add_definitions(-DLIBRARY_VERSION="${VERSION_STRING}")
 include(${PROJECT_SOURCE_DIR}/cmake/set_release.cmake)
-add_definitions(-DLIBRARY_RELEASE="${RELEASE}")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 message(STATUS "Release: ${RELEASE}")
@@ -24,19 +22,12 @@ endif()
 
 if(NOT libhackrf_SOURCE_DIR)
 find_package(LIBHACKRF REQUIRED)
-include_directories(${LIBHACKRF_INCLUDE_DIR})
-else()
-include_directories(${libhackrf_SOURCE_DIR}/src)
 endif()
 
 find_package(Threads REQUIRED)
 
 find_package(FFTW REQUIRED)
-include_directories(${FFTW_INCLUDES})
 get_filename_component(FFTW_LIBRARY_DIRS ${FFTW_LIBRARIES} DIRECTORY)
-link_directories(${FFTW_LIBRARY_DIRS})
-
-include_directories(${FFTW_INCLUDES} ${LIBHACKRF_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include)
 
 if(MSVC)
         LIST(APPEND SWEEPER_LIB_LINK_LIBS ${FFTW_LIBRARIES})
@@ -52,7 +43,15 @@ endif()
 
 # Library (libhackrf_sweeper)
 add_library(hackrf_sweeper STATIC src/lib/sweep.c)
-target_link_libraries(hackrf_sweeper ${SWEEPER_LIB_LINK_LIBS} ${LIBHACKRF_LIBRARIES})
+target_compile_definitions(hackrf_sweeper PRIVATE LIBRARY_VERSION="${VERSION_STRING}" LIBRARY_RELEASE="${RELEASE}")
+target_include_directories(hackrf_sweeper PUBLIC ${PROJECT_SOURCE_DIR}/include ${FFTW_INCLUDES})
+if(NOT libhackrf_SOURCE_DIR)
+	target_include_directories(hackrf_sweeper PUBLIC ${LIBHACKRF_INCLUDE_DIR})
+else()
+	target_include_directories(hackrf_sweeper PUBLIC ${libhackrf_SOURCE_DIR}/src)
+endif()
+target_link_directories(hackrf_sweeper PUBLIC ${FFTW_LIBRARY_DIRS})
+target_link_libraries(hackrf_sweeper PUBLIC ${SWEEPER_LIB_LINK_LIBS} ${LIBHACKRF_LIBRARIES})
 
 SET(TOOLS
     # empty for now
@@ -68,7 +67,6 @@ else()
 endif()
 
 if(NOT libhackrf_SOURCE_DIR)
-	include_directories(${LIBHACKRF_INCLUDE_DIR})
 	LIST(APPEND TOOLS_LINK_LIBS ${LIBHACKRF_LIBRARIES})
 else()
 	LIST(APPEND TOOLS_LINK_LIBS hackrf)
@@ -80,13 +78,13 @@ endif()
 
 # hackrf_sweep replacement (handled out of band to avoid name collisions with the lib)
 add_executable(hackrf_sweeper_tool src/tools/hackrf_sweeper.c)
-target_link_libraries(hackrf_sweeper_tool ${TOOLS_LINK_LIBS} hackrf_sweeper)
+target_link_libraries(hackrf_sweeper_tool PRIVATE ${TOOLS_LINK_LIBS} hackrf_sweeper)
 install(TARGETS hackrf_sweeper_tool RUNTIME DESTINATION ${INSTALL_DEFAULT_BINDIR})
 
 # Process any other tools
 foreach(tool ${TOOLS})
 	add_executable(${tool} src/tools/${tool}.c)
-	target_link_libraries(${tool} ${TOOLS_LINK_LIBS} hackrf_sweeper)
+	target_link_libraries(${tool} PRIVATE ${TOOLS_LINK_LIBS} hackrf_sweeper)
 	install(TARGETS ${tool} RUNTIME DESTINATION ${INSTALL_DEFAULT_BINDIR})
 endforeach(tool)
 
@@ -114,9 +112,9 @@ if(UNIX AND NOT APPLE)
 
         add_executable(hackrf_sweeper_zmqpub src/tools/hackrf_sweeper_zmqpub.c)
         # Include directories for MessagePack
-        include_directories(${MSGPACK_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS} ${LZMQ_INCLUDE_DIRS})
+        target_include_directories(hackrf_sweeper_zmqpub PRIVATE ${MSGPACK_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS} ${LZMQ_INCLUDE_DIRS})
 
-        target_link_libraries(hackrf_sweeper_zmqpub ${TOOLS_LINK_LIBS} ${CZMQ_LIBRARIES} ${LZMQ_LIBRARIES} hackrf_sweeper pthread)
+        target_link_libraries(hackrf_sweeper_zmqpub PRIVATE ${TOOLS_LINK_LIBS} ${CZMQ_LIBRARIES} ${LZMQ_LIBRARIES} hackrf_sweeper pthread)
         install(TARGETS hackrf_sweeper_zmqpub RUNTIME DESTINATION ${INSTALL_DEFAULT_BINDIR})
     else()
         message(WARNING "hackrf_sweeper_zmqpub will not be built, missing deps.")
